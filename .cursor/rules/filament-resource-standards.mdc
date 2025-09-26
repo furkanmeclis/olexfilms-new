@@ -1,0 +1,428 @@
+---
+globs: app/Filament/Resources/**/*.php
+description: Filament Resource geliştirme standartları
+---
+
+# Filament Resource Standartları
+
+Bu kural, Filament Resource'ları geliştirirken uyulması gereken standartları belirler.
+
+## Resource Yapısı
+
+### Temel Resource Sınıfı
+```php
+<?php
+
+namespace App\Filament\Resources\{ModuleName};
+
+use App\Filament\Resources\{ModuleName}\Pages\{List{ModuleName}};
+use App\Filament\Resources\{ModuleName}\Pages\{Create{ModuleName}};
+use App\Filament\Resources\{ModuleName}\Pages\{Edit{ModuleName}};
+use App\Filament\Resources\{ModuleName}\Pages\{View{ModuleName}};
+use App\Filament\Resources\{ModuleName}\Schemas\{ModuleName}Form;
+use App\Filament\Resources\{ModuleName}\Tables\{ModuleName}Table;
+use App\Models\{ModuleName};
+use Filament\Resources\Resource;
+
+class {ModuleName}Resource extends Resource
+{
+    protected static ?string $model = {ModuleName}::class;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Outlined{IconName};
+    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $navigationLabel = 'Türkçe İsim';
+    protected static ?string $modelLabel = 'Tekil İsim';
+    protected static ?string $pluralModelLabel = 'Çoğul İsim';
+
+    public static function form(Schema $schema): Schema
+    {
+        return {ModuleName}Form::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return {ModuleName}Table::configure($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => List{ModuleName}::route('/'),
+            'create' => Create{ModuleName}::route('/create'),
+            'view' => View{ModuleName}::route('/{record}'),
+            'edit' => Edit{ModuleName}::route('/{record}/edit'),
+        ];
+    }
+}
+```
+
+## Form Şemaları
+
+### Form Sınıfı Yapısı
+```php
+<?php
+
+namespace App\Filament\Resources\{ModuleName}\Schemas;
+
+use Filament\Forms\Components\{ComponentType};
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Schema;
+
+class {ModuleName}Form
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Tabs::make('{ModuleName} Bilgileri')
+                    ->tabs([
+                        Tabs\Tab::make('Temel Bilgiler')
+                            ->schema([
+                                Section::make('Genel Bilgiler')
+                                    ->schema([
+                                        // Form alanları buraya
+                                    ])
+                                    ->columns(2),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
+            ]);
+    }
+}
+```
+
+### Form Alanları Standartları
+- **TextInput**: Metin girişi için
+- **Select**: Seçim listesi için
+- **Textarea**: Uzun metin için
+- **Toggle**: Boolean değerler için
+- **FileUpload**: Dosya yükleme için
+- **DateTimePicker**: Tarih/saat için
+
+### Form Validasyon Kuralları
+```php
+TextInput::make('name')
+    ->label('Ad')
+    ->required()
+    ->maxLength(255)
+    ->rules(['required', 'string', 'max:255']),
+
+Select::make('status')
+    ->label('Durum')
+    ->options([
+        'active' => 'Aktif',
+        'inactive' => 'Pasif',
+    ])
+    ->required()
+    ->rules(['required', 'in:active,inactive']),
+```
+
+## Tablo Şemaları
+
+### Tablo Sınıfı Yapısı
+```php
+<?php
+
+namespace App\Filament\Resources\{ModuleName}\Tables;
+
+use Filament\Actions\{ActionType};
+use Filament\Tables\Columns\{ColumnType};
+use Filament\Tables\Filters\{FilterType};
+use Filament\Tables\Table;
+
+class {ModuleName}Table
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                // Tablo sütunları buraya
+            ])
+            ->filters([
+                // Filtreler buraya
+            ])
+            ->recordActions([
+                // Kayıt aksiyonları buraya
+            ])
+            ->toolbarActions([
+                // Araç çubuğu aksiyonları buraya
+            ])
+            ->defaultSort('created_at', 'desc');
+    }
+}
+```
+
+### Tablo Sütunları Standartları
+- **TextColumn**: Metin gösterimi için
+- **IconColumn**: İkon gösterimi için
+- **ImageColumn**: Resim gösterimi için
+- **BadgeColumn**: Durum gösterimi için
+
+### Tablo Sütun Örnekleri
+```php
+TextColumn::make('name')
+    ->label('Ad')
+    ->searchable()
+    ->sortable()
+    ->weight('bold'),
+
+IconColumn::make('is_active')
+    ->label('Aktif')
+    ->boolean()
+    ->trueIcon('heroicon-o-check-circle')
+    ->falseIcon('heroicon-o-x-circle')
+    ->trueColor('success')
+    ->falseColor('danger'),
+
+ImageColumn::make('logo_path')
+    ->label('Logo')
+    ->circular()
+    ->size(40),
+```
+
+## Import/Export Standartları
+
+### Import Sınıfı
+```php
+<?php
+
+namespace App\Filament\Imports;
+
+use App\Models\{ModuleName};
+use Filament\Actions\Imports\ImportColumn;
+use Filament\Actions\Imports\Importer;
+use Filament\Actions\Imports\Models\Import;
+
+class {ModuleName}Importer extends Importer
+{
+    protected static ?string $model = {ModuleName}::class;
+
+    public static function getColumns(): array
+    {
+        return [
+            ImportColumn::make('name')
+                ->label('Ad')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+        ];
+    }
+
+    public function resolveRecord(): {ModuleName}
+    {
+        return new {ModuleName}();
+    }
+
+    public static function getCompletedNotificationBody(Import $import): string
+    {
+        $body = '{ModuleName} import işlemi tamamlandı. ';
+        
+        if ($import->successful_rows) {
+            $body .= "{$import->successful_rows} kayıt başarıyla import edildi. ";
+        }
+        
+        if ($import->failed_rows) {
+            $body .= "{$import->failed_rows} kayıt başarısız oldu.";
+        }
+        
+        return $body;
+    }
+}
+```
+
+### Export Sınıfı
+```php
+<?php
+
+namespace App\Filament\Exports;
+
+use App\Models\{ModuleName};
+use Filament\Actions\Exports\ExportColumn;
+use Filament\Actions\Exports\Exporter;
+use Filament\Actions\Exports\Models\Export;
+
+class {ModuleName}Exporter extends Exporter
+{
+    protected static ?string $model = {ModuleName}::class;
+
+    public static function getColumns(): array
+    {
+        return [
+            ExportColumn::make('id')
+                ->label('ID'),
+            
+            ExportColumn::make('name')
+                ->label('Ad'),
+            
+            ExportColumn::make('created_at')
+                ->label('Oluşturulma Tarihi')
+                ->formatStateUsing(fn ($state) => $state->format('d/m/Y H:i')),
+        ];
+    }
+
+    public static function getCompletedNotificationBody(Export $export): string
+    {
+        $body = '{ModuleName} export işlemi tamamlandı. ';
+        
+        if ($export->successful_rows) {
+            $body .= "{$export->successful_rows} kayıt başarıyla export edildi.";
+        }
+        
+        return $body;
+    }
+}
+```
+
+## Sayfa Standartları
+
+### List Sayfası
+```php
+<?php
+
+namespace App\Filament\Resources\{ModuleName}\Pages;
+
+use App\Filament\Resources\{ModuleName}\{ModuleName}Resource;
+use Filament\Resources\Pages\ListRecords;
+
+class List{ModuleName} extends ListRecords
+{
+    protected static string $resource = {ModuleName}Resource::class;
+}
+```
+
+### Create Sayfası
+```php
+<?php
+
+namespace App\Filament\Resources\{ModuleName}\Pages;
+
+use App\Filament\Resources\{ModuleName}\{ModuleName}Resource;
+use Filament\Resources\Pages\CreateRecord;
+
+class Create{ModuleName} extends CreateRecord
+{
+    protected static string $resource = {ModuleName}Resource::class;
+}
+```
+
+### Edit Sayfası
+```php
+<?php
+
+namespace App\Filament\Resources\{ModuleName}\Pages;
+
+use App\Filament\Resources\{ModuleName}\{ModuleName}Resource;
+use Filament\Resources\Pages\EditRecord;
+
+class Edit{ModuleName} extends EditRecord
+{
+    protected static string $resource = {ModuleName}Resource::class;
+}
+```
+
+### View Sayfası
+```php
+<?php
+
+namespace App\Filament\Resources\{ModuleName}\Pages;
+
+use App\Filament\Resources\{ModuleName}\{ModuleName}Resource;
+use Filament\Resources\Pages\ViewRecord;
+
+class View{ModuleName} extends ViewRecord
+{
+    protected static string $resource = {ModuleName}Resource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
+    }
+}
+```
+
+## Türkçe Lokalizasyon
+
+### Navigation Label'ları
+```php
+protected static ?string $navigationLabel = 'Bayiler';
+protected static ?string $modelLabel = 'Bayi';
+protected static ?string $pluralModelLabel = 'Bayiler';
+```
+
+### Form Field Label'ları
+```php
+TextInput::make('name')
+    ->label('Ad Soyad')
+    ->required(),
+
+Select::make('role')
+    ->label('Rol')
+    ->options([
+        'admin' => 'Yönetici',
+        'dealer' => 'Bayi',
+        'worker' => 'Çalışan',
+    ]),
+```
+
+### Tablo Column Label'ları
+```php
+TextColumn::make('name')
+    ->label('Ad Soyad'),
+
+IconColumn::make('is_active')
+    ->label('Aktif Durumu'),
+```
+
+## Güvenlik Standartları
+
+### Authorization
+```php
+public static function canCreate(): bool
+{
+    return auth()->user()->hasRole('admin');
+}
+
+public static function canEdit($record): bool
+{
+    return auth()->user()->hasRole('admin') || 
+           auth()->user()->hasRole('dealer');
+}
+```
+
+### Form Request Validation
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class Store{ModuleName}Request extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return auth()->user()->hasRole('admin');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Ad alanı zorunludur.',
+            'email.required' => 'E-posta alanı zorunludur.',
+            'email.email' => 'Geçerli bir e-posta adresi giriniz.',
+            'email.unique' => 'Bu e-posta adresi zaten kullanılmaktadır.',
+        ];
+    }
+}
+```
+
+Bu standartlar, Filament Resource'ları geliştirirken tutarlılık sağlamak ve kod kalitesini artırmak için oluşturulmuştur.

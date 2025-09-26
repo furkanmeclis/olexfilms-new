@@ -65,6 +65,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Dealer profili ilişkisi
+     */
+    public function dealerProfile()
+    {
+        return $this->hasOne(Dealer::class);
+    }
+
+    /**
      * Kullanıcının dealer olup olmadığını kontrol et
      */
     public function isDealer(): bool

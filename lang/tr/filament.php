@@ -17,6 +17,7 @@ return [
         'search' => 'Ara',
         'submit' => 'Gönder',
         'view' => 'Görüntüle',
+        
     ],
     'fields' => [
         'name' => 'Ad',

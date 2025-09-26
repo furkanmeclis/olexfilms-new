@@ -1,0 +1,450 @@
+---
+globs: lang/**/*.php,app/Filament/**/*.php
+description: Türkçe lokalizasyon standartları
+---
+
+# Türkçe Lokalizasyon Standartları
+
+Bu kural, projede Türkçe lokalizasyon uygularken uyulması gereken standartları belirler.
+
+## Genel Lokalizasyon Kuralları
+
+### Dil Kodu Standartları
+- **Uygulama dili**: `tr` (Türkçe)
+- **Fallback dili**: `en` (İngilizce)
+- **Faker dili**: `tr_TR` (Türkçe test verileri)
+
+### .env Konfigürasyonu
+```env
+APP_LOCALE=tr
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=tr_TR
+```
+
+## Filament Lokalizasyon
+
+### Panel Provider Konfigürasyonu
+```php
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->default()
+        ->id('admin')
+        ->path('admin')
+        ->login()
+        ->databaseNotifications()
+        ->databaseNotificationsPolling('5s');
+}
+```
+
+### Resource Lokalizasyon
+```php
+class UserResource extends Resource
+{
+    protected static ?string $navigationLabel = 'Kullanıcılar';
+    protected static ?string $modelLabel = 'Kullanıcı';
+    protected static ?string $pluralModelLabel = 'Kullanıcılar';
+    protected static ?string $recordTitleAttribute = 'name';
+}
+```
+
+### Form Field Lokalizasyon
+```php
+TextInput::make('name')
+    ->label('Ad Soyad')
+    ->required()
+    ->helperText('Kullanıcının tam adını giriniz'),
+
+Select::make('role')
+    ->label('Rol')
+    ->options([
+        'admin' => 'Yönetici',
+        'dealer' => 'Bayi',
+        'worker' => 'Çalışan',
+        'central_worker' => 'Merkez Çalışanı',
+    ])
+    ->required()
+    ->helperText('Kullanıcının sistem rolünü seçiniz'),
+```
+
+### Tablo Column Lokalizasyon
+```php
+TextColumn::make('name')
+    ->label('Ad Soyad')
+    ->searchable()
+    ->sortable(),
+
+IconColumn::make('is_active')
+    ->label('Aktif Durumu')
+    ->boolean()
+    ->trueIcon('heroicon-o-check-circle')
+    ->falseIcon('heroicon-o-x-circle')
+    ->trueColor('success')
+    ->falseColor('danger'),
+
+TextColumn::make('created_at')
+    ->label('Oluşturulma Tarihi')
+    ->dateTime('d/m/Y H:i')
+    ->sortable(),
+```
+
+## Dil Dosyası Standartları
+
+### Ana Dil Dosyası (lang/tr/filament.php)
+```php
+<?php
+
+return [
+    // Navigation
+    'navigation' => [
+        'users' => 'Kullanıcılar',
+        'dealers' => 'Bayiler',
+        'roles' => 'Roller',
+        'dashboard' => 'Ana Sayfa',
+    ],
+
+    // Actions
+    'actions' => [
+        'create' => 'Oluştur',
+        'edit' => 'Düzenle',
+        'delete' => 'Sil',
+        'view' => 'Görüntüle',
+        'save' => 'Kaydet',
+        'cancel' => 'İptal',
+        'import' => 'İçe Aktar',
+        'export' => 'Dışa Aktar',
+    ],
+
+    // Status
+    'status' => [
+        'active' => 'Aktif',
+        'inactive' => 'Pasif',
+        'verified' => 'Doğrulanmış',
+        'unverified' => 'Doğrulanmamış',
+    ],
+
+    // Messages
+    'messages' => [
+        'created' => 'Kayıt başarıyla oluşturuldu.',
+        'updated' => 'Kayıt başarıyla güncellendi.',
+        'deleted' => 'Kayıt başarıyla silindi.',
+        'imported' => 'Veriler başarıyla içe aktarıldı.',
+        'exported' => 'Veriler başarıyla dışa aktarıldı.',
+    ],
+
+    // Errors
+    'errors' => [
+        'required' => 'Bu alan zorunludur.',
+        'email' => 'Geçerli bir e-posta adresi giriniz.',
+        'unique' => 'Bu değer zaten kullanılmaktadır.',
+        'min' => 'En az :min karakter olmalıdır.',
+        'max' => 'En fazla :max karakter olabilir.',
+    ],
+];
+```
+
+### Validation Mesajları (lang/tr/validation.php)
+```php
+<?php
+
+return [
+    'required' => ':attribute alanı zorunludur.',
+    'email' => ':attribute alanı geçerli bir e-posta adresi olmalıdır.',
+    'unique' => ':attribute alanı zaten kullanılmaktadır.',
+    'min' => [
+        'string' => ':attribute alanı en az :min karakter olmalıdır.',
+        'numeric' => ':attribute alanı en az :min olmalıdır.',
+    ],
+    'max' => [
+        'string' => ':attribute alanı en fazla :max karakter olabilir.',
+        'numeric' => ':attribute alanı en fazla :max olabilir.',
+    ],
+    'confirmed' => ':attribute alanı doğrulama ile eşleşmiyor.',
+    'password' => 'Şifre en az 8 karakter olmalıdır.',
+
+    'attributes' => [
+        'name' => 'Ad Soyad',
+        'email' => 'E-posta',
+        'password' => 'Şifre',
+        'password_confirmation' => 'Şifre Doğrulama',
+        'phone' => 'Telefon',
+        'address' => 'Adres',
+        'city' => 'Şehir',
+        'district' => 'İlçe',
+        'company_name' => 'Şirket Adı',
+        'trade_name' => 'Ticari Unvan',
+        'tax_number' => 'Vergi Numarası',
+        'tax_office' => 'Vergi Dairesi',
+    ],
+];
+```
+
+## Form Request Lokalizasyon
+
+### Store Request
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return auth()->user()->hasRole('admin');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'dealer_id' => ['nullable', 'integer', 'exists:users,id'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Ad Soyad alanı zorunludur.',
+            'name.string' => 'Ad Soyad alanı metin olmalıdır.',
+            'name.max' => 'Ad Soyad alanı en fazla 255 karakter olabilir.',
+            'email.required' => 'E-posta alanı zorunludur.',
+            'email.email' => 'Geçerli bir e-posta adresi giriniz.',
+            'email.unique' => 'Bu e-posta adresi zaten kullanılmaktadır.',
+            'password.required' => 'Şifre alanı zorunludur.',
+            'password.min' => 'Şifre en az 8 karakter olmalıdır.',
+            'password.confirmed' => 'Şifre doğrulama ile eşleşmiyor.',
+            'dealer_id.integer' => 'Bayi ID sayı olmalıdır.',
+            'dealer_id.exists' => 'Seçilen bayi bulunamadı.',
+        ];
+    }
+}
+```
+
+### Update Request
+```php
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateUserRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return auth()->user()->hasRole('admin');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email,' . $this->user->id],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'dealer_id' => ['nullable', 'integer', 'exists:users,id'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Ad Soyad alanı zorunludur.',
+            'email.required' => 'E-posta alanı zorunludur.',
+            'email.email' => 'Geçerli bir e-posta adresi giriniz.',
+            'email.unique' => 'Bu e-posta adresi zaten kullanılmaktadır.',
+            'password.min' => 'Şifre en az 8 karakter olmalıdır.',
+            'password.confirmed' => 'Şifre doğrulama ile eşleşmiyor.',
+        ];
+    }
+}
+```
+
+## Notification Lokalizasyon
+
+### Import/Export Bildirimleri
+```php
+public static function getCompletedNotificationBody(Import $import): string
+{
+    $body = 'Kullanıcı import işlemi tamamlandı. ';
+    
+    if ($import->successful_rows) {
+        $body .= "{$import->successful_rows} kayıt başarıyla import edildi. ";
+    }
+    
+    if ($import->failed_rows) {
+        $body .= "{$import->failed_rows} kayıt başarısız oldu.";
+    }
+    
+    return $body;
+}
+```
+
+### Genel Bildirimler
+```php
+use Filament\Notifications\Notification;
+
+Notification::make()
+    ->title('Başarılı')
+    ->success()
+    ->body('İşlem başarıyla tamamlandı.')
+    ->send();
+
+Notification::make()
+    ->title('Hata')
+    ->danger()
+    ->body('Bir hata oluştu.')
+    ->send();
+```
+
+## Tarih ve Sayı Formatları
+
+### Tarih Formatları
+```php
+// Türkçe tarih formatı
+TextColumn::make('created_at')
+    ->label('Oluşturulma Tarihi')
+    ->dateTime('d/m/Y H:i')
+    ->sortable(),
+
+// Sadece tarih
+TextColumn::make('birth_date')
+    ->label('Doğum Tarihi')
+    ->date('d/m/Y'),
+
+// Sadece saat
+TextColumn::make('start_time')
+    ->label('Başlangıç Saati')
+    ->time('H:i'),
+```
+
+### Sayı Formatları
+```php
+// Para formatı
+TextColumn::make('price')
+    ->label('Fiyat')
+    ->money('TRY'),
+
+// Yüzde formatı
+TextColumn::make('discount')
+    ->label('İndirim')
+    ->formatStateUsing(fn ($state) => $state . '%'),
+```
+
+## Filtre Lokalizasyon
+
+### Select Filter
+```php
+SelectFilter::make('role')
+    ->label('Rol')
+    ->options([
+        'admin' => 'Yönetici',
+        'dealer' => 'Bayi',
+        'worker' => 'Çalışan',
+        'central_worker' => 'Merkez Çalışanı',
+    ])
+    ->searchable()
+    ->preload(),
+```
+
+### Ternary Filter
+```php
+TernaryFilter::make('is_active')
+    ->label('Aktif Durumu')
+    ->boolean()
+    ->trueLabel('Aktif')
+    ->falseLabel('Pasif')
+    ->native(false),
+```
+
+## Helper Text Lokalizasyon
+
+### Form Helper Text
+```php
+TextInput::make('phone')
+    ->label('Telefon')
+    ->tel()
+    ->helperText('Örnek: +90 532 123 45 67'),
+
+TextInput::make('website')
+    ->label('Web Sitesi')
+    ->url()
+    ->helperText('Örnek: https://www.example.com'),
+
+Textarea::make('description')
+    ->label('Açıklama')
+    ->rows(4)
+    ->helperText('Maksimum 500 karakter'),
+```
+
+### Tablo Helper Text
+```php
+TextColumn::make('email')
+    ->label('E-posta')
+    ->copyable()
+    ->tooltip('Kopyalamak için tıklayın'),
+```
+
+## Icon Lokalizasyon
+
+### Heroicon Kullanımı
+```php
+IconColumn::make('is_active')
+    ->label('Aktif')
+    ->boolean()
+    ->trueIcon('heroicon-o-check-circle')
+    ->falseIcon('heroicon-o-x-circle')
+    ->trueColor('success')
+    ->falseColor('danger'),
+
+IconColumn::make('is_verified')
+    ->label('Doğrulanmış')
+    ->boolean()
+    ->trueIcon('heroicon-o-shield-check')
+    ->falseIcon('heroicon-o-shield-exclamation')
+    ->trueColor('success')
+    ->falseColor('warning'),
+```
+
+## Özel Lokalizasyon
+
+### Custom Accessor
+```php
+// Model'de
+public function getFullNameAttribute(): string
+{
+    return $this->first_name . ' ' . $this->last_name;
+}
+
+// Tablo'da
+TextColumn::make('full_name')
+    ->label('Tam Ad')
+    ->searchable(['first_name', 'last_name']),
+```
+
+### Custom Format
+```php
+TextColumn::make('roles')
+    ->label('Roller')
+    ->formatStateUsing(fn ($record) => $record->roles->pluck('name')->implode(', ')),
+```
+
+## Test Lokalizasyon
+
+### Faker Türkçe
+```php
+// config/app.php
+'faker_locale' => 'tr_TR',
+
+// Seeder'da
+User::factory()->create([
+    'name' => fake('tr_TR')->name(),
+    'email' => fake('tr_TR')->email(),
+]);
+```
+
+Bu standartlar, projede tutarlı Türkçe lokalizasyon sağlamak için oluşturulmuştur.

@@ -1,0 +1,462 @@
+---
+globs: app/Filament/Imports/*.php,app/Filament/Exports/*.php
+description: Import/Export sistemi standartları
+---
+
+# Import/Export Sistemi Standartları
+
+Bu kural, Filament import/export sistemi geliştirirken uyulması gereken standartları belirler.
+
+## Import Sistemi Standartları
+
+### Import Sınıfı Yapısı
+```php
+<?php
+
+namespace App\Filament\Imports;
+
+use App\Models\{ModelName};
+use Filament\Actions\Imports\ImportColumn;
+use Filament\Actions\Imports\Importer;
+use Filament\Actions\Imports\Models\Import;
+
+class {ModelName}Importer extends Importer
+{
+    protected static ?string $model = {ModelName}::class;
+
+    public static function getColumns(): array
+    {
+        return [
+            // Import column'ları buraya
+        ];
+    }
+
+    public function resolveRecord(): {ModelName}
+    {
+        return new {ModelName}();
+    }
+
+    protected function afterSave(): void
+    {
+        // Kayıt sonrası işlemler
+    }
+
+    public static function getCompletedNotificationBody(Import $import): string
+    {
+        // Bildirim mesajı
+    }
+}
+```
+
+### Import Column Standartları
+
+#### Temel Column Tipleri
+```php
+// Gerekli alanlar
+ImportColumn::make('name')
+    ->label('Ad')
+    ->requiredMapping()
+    ->rules(['required', 'string', 'max:255']),
+
+// Opsiyonel alanlar
+ImportColumn::make('description')
+    ->label('Açıklama')
+    ->rules(['nullable', 'string']),
+
+// Unique alanlar
+ImportColumn::make('email')
+    ->label('E-posta')
+    ->requiredMapping()
+    ->rules(['required', 'email', 'unique:users,email']),
+
+// Numeric alanlar
+ImportColumn::make('age')
+    ->label('Yaş')
+    ->rules(['nullable', 'integer', 'min:0', 'max:120']),
+
+// Boolean alanlar
+ImportColumn::make('is_active')
+    ->label('Aktif')
+    ->rules(['nullable', 'boolean'])
+    ->default(true),
+```
+
+#### Foreign Key Column'ları
+```php
+// User ilişkisi
+ImportColumn::make('user_id')
+    ->label('Kullanıcı ID')
+    ->rules(['nullable', 'integer', 'exists:users,id'])
+    ->helperText('Kullanıcı ID\'si gerekli'),
+
+// Dealer ilişkisi
+ImportColumn::make('dealer_id')
+    ->label('Bayi ID')
+    ->rules(['nullable', 'integer', 'exists:users,id'])
+    ->helperText('Worker kullanıcıları için bayi ID\'si gerekli'),
+```
+
+#### Tarih Column'ları
+```php
+ImportColumn::make('created_at')
+    ->label('Oluşturulma Tarihi')
+    ->rules(['nullable', 'date']),
+
+ImportColumn::make('expires_at')
+    ->label('Son Kullanma Tarihi')
+    ->rules(['nullable', 'date', 'after:today']),
+```
+
+### Import Validasyon Kuralları
+
+#### String Validasyon
+```php
+ImportColumn::make('name')
+    ->rules(['required', 'string', 'max:255']),
+
+ImportColumn::make('email')
+    ->rules(['required', 'email', 'max:255', 'unique:users,email']),
+
+ImportColumn::make('phone')
+    ->rules(['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s()]+$/']),
+```
+
+#### Numeric Validasyon
+```php
+ImportColumn::make('age')
+    ->rules(['nullable', 'integer', 'min:0', 'max:120']),
+
+ImportColumn::make('price')
+    ->rules(['nullable', 'numeric', 'min:0']),
+
+ImportColumn::make('discount')
+    ->rules(['nullable', 'numeric', 'min:0', 'max:100']),
+```
+
+#### Boolean Validasyon
+```php
+ImportColumn::make('is_active')
+    ->rules(['nullable', 'boolean']),
+
+ImportColumn::make('is_verified')
+    ->rules(['nullable', 'boolean']),
+```
+
+### Import İşlem Sonrası
+
+#### afterSave() Metodu
+```php
+protected function afterSave(): void
+{
+    // Şifre hash'leme
+    if (isset($this->data['password'])) {
+        $this->record->password = bcrypt($this->data['password']);
+    }
+    
+    // Rol atama
+    if (!$this->record->hasAnyRole(['admin', 'dealer', 'worker', 'central_worker'])) {
+        $this->record->assignRole('worker');
+    }
+    
+    // İlişki kurma
+    if (isset($this->data['dealer_id'])) {
+        $this->record->dealer_id = $this->data['dealer_id'];
+    }
+    
+    $this->record->save();
+}
+```
+
+#### Bildirim Mesajları
+```php
+public static function getCompletedNotificationBody(Import $import): string
+{
+    $body = '{ModelName} import işlemi tamamlandı. ';
+    
+    if ($import->successful_rows) {
+        $body .= "{$import->successful_rows} kayıt başarıyla import edildi. ";
+    }
+    
+    if ($import->failed_rows) {
+        $body .= "{$import->failed_rows} kayıt başarısız oldu.";
+    }
+    
+    return $body;
+}
+```
+
+## Export Sistemi Standartları
+
+### Export Sınıfı Yapısı
+```php
+<?php
+
+namespace App\Filament\Exports;
+
+use App\Models\{ModelName};
+use Filament\Actions\Exports\ExportColumn;
+use Filament\Actions\Exports\Exporter;
+use Filament\Actions\Exports\Models\Export;
+
+class {ModelName}Exporter extends Exporter
+{
+    protected static ?string $model = {ModelName}::class;
+
+    public static function getColumns(): array
+    {
+        return [
+            // Export column'ları buraya
+        ];
+    }
+
+    public static function getCompletedNotificationBody(Export $export): string
+    {
+        // Bildirim mesajı
+    }
+}
+```
+
+### Export Column Standartları
+
+#### Temel Column Tipleri
+```php
+// ID alanları
+ExportColumn::make('id')
+    ->label('ID'),
+
+// Metin alanları
+ExportColumn::make('name')
+    ->label('Ad Soyad'),
+
+ExportColumn::make('email')
+    ->label('E-posta'),
+
+// Numeric alanlar
+ExportColumn::make('age')
+    ->label('Yaş'),
+
+// Boolean alanlar
+ExportColumn::make('is_active')
+    ->label('Aktif')
+    ->formatStateUsing(fn ($state) => $state ? 'Evet' : 'Hayır'),
+```
+
+#### İlişki Column'ları
+```php
+// BelongsTo ilişkisi
+ExportColumn::make('dealer.name')
+    ->label('Bayi Adı'),
+
+// HasMany ilişkisi
+ExportColumn::make('workers_count')
+    ->label('Çalışan Sayısı')
+    ->formatStateUsing(fn ($record) => $record->workers->count()),
+
+// BelongsToMany ilişkisi
+ExportColumn::make('roles')
+    ->label('Roller')
+    ->formatStateUsing(fn ($record) => $record->roles->pluck('name')->implode(', ')),
+```
+
+#### Tarih Column'ları
+```php
+ExportColumn::make('created_at')
+    ->label('Oluşturulma Tarihi')
+    ->formatStateUsing(fn ($state) => $state->format('d/m/Y H:i')),
+
+ExportColumn::make('updated_at')
+    ->label('Güncelleme Tarihi')
+    ->formatStateUsing(fn ($state) => $state->format('d/m/Y H:i')),
+
+ExportColumn::make('email_verified_at')
+    ->label('E-posta Doğrulama Tarihi')
+    ->formatStateUsing(fn ($state) => $state ? $state->format('d/m/Y H:i') : 'Doğrulanmamış'),
+```
+
+#### Özel Format Column'ları
+```php
+// Para formatı
+ExportColumn::make('price')
+    ->label('Fiyat')
+    ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₺'),
+
+// Yüzde formatı
+ExportColumn::make('discount')
+    ->label('İndirim')
+    ->formatStateUsing(fn ($state) => $state . '%'),
+
+// JSON formatı
+ExportColumn::make('metadata')
+    ->label('Meta Veriler')
+    ->formatStateUsing(fn ($state) => is_array($state) ? json_encode($state, JSON_UNESCAPED_UNICODE) : $state),
+```
+
+### Export Bildirim Mesajları
+```php
+public static function getCompletedNotificationBody(Export $export): string
+{
+    $body = '{ModelName} export işlemi tamamlandı. ';
+    
+    if ($export->successful_rows) {
+        $body .= "{$export->successful_rows} kayıt başarıyla export edildi.";
+    }
+    
+    return $body;
+}
+```
+
+## Tablo Entegrasyonu
+
+### Import Action
+```php
+use Filament\Actions\ImportAction;
+use App\Filament\Imports\{ModelName}Importer;
+
+// Tablo toolbar actions
+->toolbarActions([
+    ImportAction::make()
+        ->importer({ModelName}Importer::class)
+        ->label('Import')
+        ->color('success'),
+    // Diğer action'lar
+])
+```
+
+### Export Action
+```php
+use Filament\Actions\ExportBulkAction;
+use App\Filament\Exports\{ModelName}Exporter;
+
+// Tablo toolbar actions
+->toolbarActions([
+    ExportBulkAction::make()
+        ->exporter({ModelName}Exporter::class)
+        ->label('Export')
+        ->color('info'),
+    // Diğer action'lar
+])
+```
+
+## CSV Dosya Standartları
+
+### CSV Header Formatı
+```csv
+name,email,password,dealer_id,is_active
+Test Kullanıcı 1,test1@example.com,password123,,1
+Test Kullanıcı 2,test2@example.com,password123,2,1
+```
+
+### CSV Encoding
+- **Encoding**: UTF-8
+- **Separator**: Virgül (,)
+- **Quote**: Çift tırnak (")
+- **Line Ending**: LF (\n)
+
+### CSV Validasyon
+```php
+// CSV dosya kontrolü
+if (!file_exists($filePath)) {
+    throw new \Exception('CSV dosyası bulunamadı.');
+}
+
+// Encoding kontrolü
+$content = file_get_contents($filePath);
+if (!mb_check_encoding($content, 'UTF-8')) {
+    throw new \Exception('CSV dosyası UTF-8 formatında olmalıdır.');
+}
+```
+
+## Hata Yönetimi
+
+### Import Hataları
+```php
+// Validation hataları
+try {
+    $this->record->save();
+} catch (\Illuminate\Validation\ValidationException $e) {
+    $this->addError('validation', $e->getMessage());
+    return;
+}
+
+// Database hataları
+try {
+    $this->record->save();
+} catch (\Exception $e) {
+    $this->addError('database', 'Veritabanı hatası: ' . $e->getMessage());
+    return;
+}
+```
+
+### Export Hataları
+```php
+// Memory limit kontrolü
+if (memory_get_usage() > 128 * 1024 * 1024) {
+    throw new \Exception('Bellek limiti aşıldı. Daha az veri export edin.');
+}
+
+// Dosya yazma kontrolü
+if (!is_writable($exportPath)) {
+    throw new \Exception('Export dosyası yazılamıyor.');
+}
+```
+
+## Performans Optimizasyonu
+
+### Import Optimizasyonu
+```php
+// Batch processing
+protected function afterSave(): void
+{
+    // Tek seferde kaydet
+    $this->record->save();
+    
+    // Cache temizle
+    cache()->forget('users_count');
+}
+```
+
+### Export Optimizasyonu
+```php
+// Chunk processing
+public function getRecords(): \Illuminate\Support\Collection
+{
+    return {ModelName}::chunk(1000, function ($records) {
+        return $records;
+    });
+}
+```
+
+## Test Standartları
+
+### Import Test
+```php
+public function test_user_import()
+{
+    $csvData = [
+        ['name', 'email', 'password'],
+        ['Test User', 'test@example.com', 'password123'],
+    ];
+    
+    $importer = new UserImporter();
+    $result = $importer->import($csvData);
+    
+    $this->assertEquals(1, $result->successful_rows);
+    $this->assertEquals(0, $result->failed_rows);
+}
+```
+
+### Export Test
+```php
+public function test_user_export()
+{
+    User::factory()->count(10)->create();
+    
+    $exporter = new UserExporter();
+    $result = $exporter->export();
+    
+    $this->assertEquals(10, $result->successful_rows);
+    $this->assertFileExists($result->file_path);
+}
+```
+
+Bu standartlar, import/export sistemi geliştirirken tutarlılık sağlamak ve performansı artırmak için oluşturulmuştur.

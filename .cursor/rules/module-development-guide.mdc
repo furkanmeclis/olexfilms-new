@@ -1,0 +1,238 @@
+---
+alwaysApply: true
+description: Laravel Filament modül geliştirme rehberi ve standartları
+---
+
+# Modül Geliştirme Rehberi
+
+Bu proje Laravel 12.x ve Filament v4.x kullanılarak geliştirilmiştir. Modül geliştirme sürecinde aşağıdaki kurallara uyulmalıdır.
+
+## Proje Yapısı
+
+### Temel Dizin Yapısı
+```
+app/
+├── Filament/
+│   ├── Resources/           # Filament Resource'ları
+│   │   ├── {ModuleName}/
+│   │   │   ├── {ModuleName}Resource.php
+│   │   │   ├── Pages/      # Resource sayfaları
+│   │   │   ├── Schemas/    # Form şemaları
+│   │   │   └── Tables/     # Tablo şemaları
+│   ├── Imports/            # Import sınıfları
+│   ├── Exports/            # Export sınıfları
+│   └── Widgets/            # Widget'lar
+├── Models/                 # Eloquent modelleri
+├── Http/
+│   └── Requests/          # Form Request sınıfları
+└── Providers/
+    └── Filament/          # Filament panel provider'ları
+```
+
+## Modül Geliştirme Standartları
+
+### 1. Model Oluşturma
+- Her modül için ayrı model oluştur
+- Model isimleri PascalCase kullanmalı
+- `fillable`, `casts`, `relationships` tanımlamaları zorunlu
+- Accessor ve mutator metodları ekle
+
+### 2. Migration Oluşturma
+- Migration dosyaları timestamp ile başlamalı
+- Tablo isimleri çoğul olmalı (örn: `users`, `dealers`)
+- Foreign key'ler için `constrained()` kullan
+- Index'ler gerekli alanlar için ekle
+
+### 3. Filament Resource Oluşturma
+- Resource dosyası: `{ModuleName}Resource.php`
+- Form şeması: `Schemas/{ModuleName}Form.php`
+- Tablo şeması: `Tables/{ModuleName}Table.php`
+- Sayfalar: `Pages/` dizininde organize et
+
+### 4. Form Şemaları
+- `Tabs` kullanarak form alanlarını grupla
+- `Section` ile ilgili alanları birleştir
+- Validasyon kuralları ekle
+- Helper text'ler Türkçe olmalı
+
+### 5. Tablo Şemaları
+- `TextColumn`, `IconColumn`, `ImageColumn` kullan
+- `Searchable`, `Sortable` özelliklerini ekle
+- `Filter`'lar ekle (SelectFilter, TernaryFilter)
+- `Actions` (View, Edit, Delete) ekle
+
+### 6. Import/Export Sistemi
+- Her modül için `Importer` ve `Exporter` sınıfları oluştur
+- Import için `ImportColumn` tanımla
+- Export için `ExportColumn` tanımla
+- Validasyon kuralları ekle
+- Türkçe bildirim mesajları
+
+## Kod Standartları
+
+### PHP Kod Standartları
+- PSR-12 standartlarına uy
+- Class isimleri PascalCase
+- Method isimleri camelCase
+- Property isimleri camelCase
+- Constant isimleri UPPER_CASE
+
+### Filament Özel Standartları
+- Resource sınıfları `{ModuleName}Resource` formatında
+- Form sınıfları `{ModuleName}Form` formatında
+- Tablo sınıfları `{ModuleName}Table` formatında
+- Import sınıfları `{ModuleName}Importer` formatında
+- Export sınıfları `{ModuleName}Exporter` formatında
+
+### Türkçe Lokalizasyon
+- Tüm UI metinleri Türkçe olmalı
+- `lang/tr/filament.php` dosyasını güncelle
+- Resource navigation label'ları Türkçe
+- Form field label'ları Türkçe
+- Tablo column label'ları Türkçe
+
+## İlişki Yönetimi
+
+### Eloquent İlişkileri
+- `belongsTo`: Tekil ilişki
+- `hasMany`: Çoklu ilişki
+- `hasOne`: Tekil ilişki
+- `belongsToMany`: Çoktan çoğa ilişki
+
+### Foreign Key Kuralları
+- Foreign key'ler `{model}_id` formatında
+- `constrained()` ile referans bütünlüğü
+- `onDelete('cascade')` veya `onDelete('set null')`
+
+## Güvenlik Standartları
+
+### Form Request Validation
+- Her modül için `Store{ModuleName}Request` ve `Update{ModuleName}Request` oluştur
+- Server-side validasyon zorunlu
+- Authorization kontrolü ekle
+- Türkçe hata mesajları
+
+### Role-Based Access Control
+- Spatie Laravel Permission kullan
+- Roller: `admin`, `dealer`, `worker`, `central_worker`
+- Permission'lar modül bazında tanımla
+- Resource'lar için authorization ekle
+
+## Performans Optimizasyonu
+
+### Database Optimizasyonu
+- Gerekli index'leri ekle
+- N+1 query problemini önle
+- `with()` ile eager loading kullan
+- `select()` ile gereksiz alanları yükleme
+
+### Filament Optimizasyonu
+- `preload()` ile relationship'leri önceden yükle
+- `searchable()` sadece gerekli alanlarda kullan
+- `toggleable()` ile gereksiz column'ları gizle
+- `defaultSort()` ile varsayılan sıralama
+
+## Test Standartları
+
+### Unit Testler
+- Model testleri
+- Relationship testleri
+- Accessor/Mutator testleri
+- Validation testleri
+
+### Feature Testler
+- Resource CRUD testleri
+- Import/Export testleri
+- Authorization testleri
+- Form validation testleri
+
+## Dokümantasyon
+
+### Kod Dokümantasyonu
+- Class ve method'larda PHPDoc kullan
+- Parametre ve return type'ları belirt
+- Örnek kullanımlar ekle
+
+### README Dosyaları
+- Her modül için README.md oluştur
+- Kurulum adımları
+- Kullanım örnekleri
+- API dokümantasyonu
+
+## Git Workflow
+
+### Branch Stratejisi
+- `main`: Production branch
+- `develop`: Development branch
+- `feature/{module-name}`: Feature branch'leri
+- `hotfix/{issue-name}`: Hotfix branch'leri
+
+### Commit Mesajları
+- `feat:` Yeni özellik
+- `fix:` Bug düzeltmesi
+- `docs:` Dokümantasyon
+- `style:` Kod formatı
+- `refactor:` Kod yeniden düzenleme
+- `test:` Test ekleme
+- `chore:` Build/deploy işlemleri
+
+## Örnek Modül Yapısı
+
+### Dealer Modülü Örneği
+```
+app/Filament/Resources/Dealers/
+├── DealerResource.php
+├── Pages/
+│   ├── ListDealers.php
+│   ├── CreateDealer.php
+│   ├── EditDealer.php
+│   └── ViewDealer.php
+├── Schemas/
+│   └── DealerForm.php
+└── Tables/
+    └── DealersTable.php
+```
+
+### User Modülü Örneği
+```
+app/Filament/Resources/Users/
+├── UserResource.php
+├── Pages/
+│   ├── ListUsers.php
+│   ├── CreateUser.php
+│   ├── EditUser.php
+│   └── ViewUser.php
+├── Schemas/
+│   └── UserForm.php
+└── Tables/
+    └── UsersTable.php
+```
+
+## Hata Yönetimi
+
+### Exception Handling
+- Custom exception sınıfları oluştur
+- Try-catch blokları kullan
+- Log kayıtları ekle
+- Kullanıcı dostu hata mesajları
+
+### Validation Hataları
+- Form validation hataları
+- Database constraint hataları
+- Business logic hataları
+- Türkçe hata mesajları
+
+## Cache Yönetimi
+
+### Cache Stratejisi
+- Model cache'leme
+- Query cache'leme
+- View cache'leme
+- Config cache'leme
+
+### Cache Temizleme
+- Model değişikliklerinde cache temizle
+- Config değişikliklerinde cache temizle
+- View değişikliklerinde cache temizle
+
+Bu rehber, proje geliştirme sürecinde tutarlılık sağlamak ve kod kalitesini artırmak için oluşturulmuştur.

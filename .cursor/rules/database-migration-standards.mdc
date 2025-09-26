@@ -1,0 +1,381 @@
+---
+globs: database/migrations/*.php
+description: Database migration standartları ve kuralları
+---
+
+# Database Migration Standartları
+
+Bu kural, Laravel migration'ları geliştirirken uyulması gereken standartları belirler.
+
+## Migration Dosya Adlandırma
+
+### Dosya Adı Formatı
+```
+{timestamp}_{action}_{table_name}_table.php
+```
+
+### Örnekler
+```
+2025_09_26_093241_add_dealer_id_to_users_table.php
+2025_09_26_095838_create_dealers_table.php
+2025_09_26_101656_create_imports_table.php
+```
+
+## Migration Sınıf Yapısı
+
+### Temel Migration Sınıfı
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('table_name', function (Blueprint $table) {
+            // Tablo yapısı buraya
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('table_name');
+    }
+};
+```
+
+## Tablo Oluşturma Standartları
+
+### Temel Tablo Yapısı
+```php
+Schema::create('table_name', function (Blueprint $table) {
+    $table->id();
+    
+    // Foreign key'ler
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    
+    // Temel alanlar
+    $table->string('name');
+    $table->string('email')->unique();
+    $table->text('description')->nullable();
+    
+    // Boolean alanlar
+    $table->boolean('is_active')->default(true);
+    
+    // Tarih alanları
+    $table->timestamp('created_at')->nullable();
+    $table->timestamp('updated_at')->nullable();
+});
+```
+
+### Sütun Tipleri Standartları
+
+#### String Sütunları
+```php
+$table->string('name');                    // VARCHAR(255)
+$table->string('name', 100);              // VARCHAR(100)
+$table->char('code', 10);                 // CHAR(10)
+$table->text('description');              // TEXT
+$table->longText('content');              // LONGTEXT
+```
+
+#### Numeric Sütunları
+```php
+$table->integer('age');                    // INT
+$table->bigInteger('user_id');             // BIGINT
+$table->smallInteger('status');            // SMALLINT
+$table->tinyInteger('flag');               // TINYINT
+$table->decimal('price', 8, 2);           // DECIMAL(8,2)
+$table->float('rate', 8, 2);              // FLOAT(8,2)
+$table->double('amount', 8, 2);            // DOUBLE(8,2)
+```
+
+#### Boolean Sütunları
+```php
+$table->boolean('is_active')->default(true);
+$table->boolean('is_verified')->default(false);
+```
+
+#### Tarih Sütunları
+```php
+$table->timestamp('created_at')->nullable();
+$table->timestamp('updated_at')->nullable();
+$table->timestamp('deleted_at')->nullable();
+$table->date('birth_date')->nullable();
+$table->time('start_time')->nullable();
+$table->dateTime('expires_at')->nullable();
+```
+
+#### JSON Sütunları
+```php
+$table->json('metadata')->nullable();
+$table->jsonb('settings')->nullable();
+```
+
+## Foreign Key Standartları
+
+### Foreign Key Oluşturma
+```php
+// Basit foreign key
+$table->foreignId('user_id')->constrained();
+
+// Cascade delete ile
+$table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+// Set null ile
+$table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+
+// Restrict ile
+$table->foreignId('user_id')->constrained()->onDelete('restrict');
+```
+
+### Foreign Key Referansları
+```php
+// Users tablosuna referans
+$table->foreignId('user_id')->constrained('users');
+
+// Belirli sütuna referans
+$table->foreignId('user_id')->constrained('users', 'id');
+
+// Cascade update ile
+$table->foreignId('user_id')->constrained()->onUpdate('cascade');
+```
+
+## Index Standartları
+
+### Primary Key
+```php
+$table->id();                              // Auto increment primary key
+$table->uuid('id')->primary();             // UUID primary key
+```
+
+### Unique Index
+```php
+$table->string('email')->unique();         // Unique constraint
+$table->unique(['email', 'phone']);        // Composite unique
+```
+
+### Index Oluşturma
+```php
+$table->index('name');                      // Single column index
+$table->index(['name', 'email']);          // Composite index
+$table->index('created_at');               // Date index
+```
+
+### Full Text Index
+```php
+$table->fullText(['title', 'content']);    // Full text search
+```
+
+## Tablo Değiştirme Standartları
+
+### Sütun Ekleme
+```php
+Schema::table('users', function (Blueprint $table) {
+    $table->string('phone')->nullable();
+    $table->boolean('is_verified')->default(false);
+});
+```
+
+### Sütun Değiştirme
+```php
+Schema::table('users', function (Blueprint $table) {
+    $table->string('name', 100)->change();
+    $table->text('description')->nullable()->change();
+});
+```
+
+### Sütun Silme
+```php
+Schema::table('users', function (Blueprint $table) {
+    $table->dropColumn('old_field');
+    $table->dropColumn(['field1', 'field2']);
+});
+```
+
+### Index Ekleme/Silme
+```php
+Schema::table('users', function (Blueprint $table) {
+    $table->index('email');
+    $table->dropIndex(['email']);
+});
+```
+
+## Rollback Standartları
+
+### Tablo Silme
+```php
+public function down(): void
+{
+    Schema::dropIfExists('table_name');
+}
+```
+
+### Sütun Silme
+```php
+public function down(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->dropColumn('new_field');
+    });
+}
+```
+
+### Foreign Key Silme
+```php
+public function down(): void
+{
+    Schema::table('posts', function (Blueprint $table) {
+        $table->dropForeign(['user_id']);
+        $table->dropColumn('user_id');
+    });
+}
+```
+
+## Özel Migration Tipleri
+
+### Pivot Tablo
+```php
+Schema::create('role_user', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('role_id')->constrained()->onDelete('cascade');
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->timestamps();
+    
+    $table->unique(['role_id', 'user_id']);
+});
+```
+
+### Soft Delete Tablo
+```php
+Schema::create('posts', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->text('content');
+    $table->foreignId('user_id')->constrained();
+    $table->timestamps();
+    $table->softDeletes();                 // deleted_at sütunu
+});
+```
+
+### Polymorphic İlişki
+```php
+Schema::create('comments', function (Blueprint $table) {
+    $table->id();
+    $table->text('content');
+    $table->morphs('commentable');         // commentable_id, commentable_type
+    $table->foreignId('user_id')->constrained();
+    $table->timestamps();
+});
+```
+
+## Veri Tipi Seçimi Rehberi
+
+### String Veriler
+- **VARCHAR(255)**: Normal metin alanları
+- **VARCHAR(100)**: Kısa metin alanları
+- **CHAR(10)**: Sabit uzunlukta kodlar
+- **TEXT**: Uzun metin içerikleri
+- **LONGTEXT**: Çok uzun metin içerikleri
+
+### Numeric Veriler
+- **INT**: Normal sayılar
+- **BIGINT**: Büyük sayılar (ID'ler)
+- **DECIMAL(8,2)**: Para miktarları
+- **FLOAT**: Ondalıklı sayılar
+
+### Tarih Veriler
+- **TIMESTAMP**: Otomatik tarih/saat
+- **DATE**: Sadece tarih
+- **TIME**: Sadece saat
+- **DATETIME**: Manuel tarih/saat
+
+### Boolean Veriler
+- **BOOLEAN**: True/False değerler
+- **TINYINT(1)**: 0/1 değerler
+
+## Performans Optimizasyonu
+
+### Index Stratejisi
+```php
+// Sık kullanılan arama alanları
+$table->index('email');
+$table->index('created_at');
+
+// Composite index'ler
+$table->index(['user_id', 'status']);
+$table->index(['category_id', 'is_active']);
+```
+
+### Foreign Key Optimizasyonu
+```php
+// Cascade delete kullanımı
+$table->foreignId('user_id')->constrained()->onDelete('cascade');
+
+// Set null kullanımı
+$table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+```
+
+## Güvenlik Standartları
+
+### Sensitive Data
+```php
+// Şifre alanları
+$table->string('password');
+
+// API anahtarları
+$table->string('api_key')->nullable();
+
+// Token'lar
+$table->string('remember_token')->nullable();
+```
+
+### Validation Constraints
+```php
+// Email formatı
+$table->string('email')->unique();
+
+// Telefon formatı
+$table->string('phone', 20)->nullable();
+
+// URL formatı
+$table->string('website')->nullable();
+```
+
+## Migration Test Standartları
+
+### Test Migration
+```php
+public function up(): void
+{
+    if (app()->environment('testing')) {
+        // Test verileri ekle
+        DB::table('users')->insert([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
+    }
+}
+```
+
+### Rollback Test
+```php
+public function down(): void
+{
+    if (app()->environment('testing')) {
+        // Test verilerini temizle
+        DB::table('users')->where('email', 'test@example.com')->delete();
+    }
+}
+```
+
+Bu standartlar, database migration'ları geliştirirken tutarlılık sağlamak ve performansı artırmak için oluşturulmuştur.
