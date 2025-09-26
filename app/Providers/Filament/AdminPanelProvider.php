@@ -44,7 +44,11 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3rem')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
+                \App\Filament\Widgets\StatsOverview::class,
+                \App\Filament\Widgets\MonthlyTransfersChart::class,
+                \App\Filament\Widgets\ProductCategoriesChart::class,
+                \App\Filament\Widgets\RecentTransfersTable::class,
+                \App\Filament\Widgets\RecentProductCodesTable::class,
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')

@@ -88,7 +88,7 @@ class CarBrandsTable
             ->headerActions([
                 ImportAction::make()
                     ->importer(CarBrandImporter::class)
-                    ->label('Import')
+                    ->label('İçe Aktar')
                     ->color('success'),
             ])
             ->recordActions([
@@ -99,7 +99,7 @@ class CarBrandsTable
                 BulkActionGroup::make([
                     ExportBulkAction::make()
                         ->exporter(CarBrandExporter::class)
-                        ->label('Export')
+                        ->label('Dışa Aktar')
                         ->color('info'),
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),

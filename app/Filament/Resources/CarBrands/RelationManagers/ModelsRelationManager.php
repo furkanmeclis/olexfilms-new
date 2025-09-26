@@ -110,7 +110,7 @@ class ModelsRelationManager extends RelationManager
                     ->label('Mevcut Model Ekle'),
                 ImportAction::make()
                     ->importer(CarModelImporter::class)
-                    ->label('Import')
+                    ->label('İçe Aktar')
                     ->color('success'),
             ])
             ->recordActions([
@@ -123,7 +123,7 @@ class ModelsRelationManager extends RelationManager
                 BulkActionGroup::make([
                     ExportBulkAction::make()
                         ->exporter(CarModelExporter::class)
-                        ->label('Export')
+                        ->label('Dışa Aktar')
                         ->color('info'),
                     DissociateBulkAction::make(),
                     DeleteBulkAction::make(),
