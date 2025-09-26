@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
@@ -86,5 +88,13 @@ class User extends Authenticatable
     public function isWorker(): bool
     {
         return $this->hasRole('worker');
+    }
+
+    /**
+     * Filament panel erişim kontrolü
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->hasAnyRole(['admin', 'dealer', 'worker', 'central_worker']);
     }
 }

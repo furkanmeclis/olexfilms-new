@@ -27,7 +27,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('panel')
             ->login()
             ->colors([
                 'primary' => Color::Green,
@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
+                \App\Filament\Pages\Profile::class,
             ])
             ->brandName('Olex Films')
             ->brandLogo(asset('logo.png'))
@@ -52,6 +53,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')
+            ->userMenuItems([
+                'profile' => \Filament\Navigation\MenuItem::make()
+                    ->label('Profil')
+                    ->url(fn (): string => \App\Filament\Pages\Profile::getUrl())
+                    ->icon('heroicon-o-user')
+                    ->sort(1),
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
