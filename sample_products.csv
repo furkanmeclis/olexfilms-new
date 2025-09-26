@@ -1,0 +1,6 @@
+name,description,specifications,price,warranty_months,category_name,is_active,sort_order
+iPhone 15 Pro,"Apple'ın en yeni iPhone modeli","Ekran: 6.1 inç Super Retina XDR, İşlemci: A17 Pro, Kamera: 48MP Ana Kamera",45000,24,Elektronik,1,1
+Samsung Galaxy S24,"Samsung'un flagship telefonu","Ekran: 6.8 inç Dynamic AMOLED, İşlemci: Snapdragon 8 Gen 3, Kamera: 200MP Ana Kamera",42000,24,Elektronik,1,2
+MacBook Air M3,"Apple'ın ince ve hafif laptop'u","İşlemci: M3, RAM: 8GB, Depolama: 256GB SSD, Ekran: 13.6 inç Liquid Retina",35000,12,Bilgisayar,1,3
+Dell XPS 13,"Dell'in premium ultrabook'u","İşlemci: Intel i7, RAM: 16GB, Depolama: 512GB SSD, Ekran: 13.4 inç 4K",28000,12,Bilgisayar,1,4
+Sony WH-1000XM5,"Sony'nin premium kulaklığı","Aktif Gürültü Engelleme, 30 saat pil ömrü, Bluetooth 5.2",8500,12,Elektronik,1,5

@@ -91,11 +91,11 @@ class UsersTable
             ->toolbarActions([
                 ImportAction::make()
                     ->importer(UserImporter::class)
-                    ->label('Import')
+                    ->label('İçe Aktar')
                     ->color('success'),
                 ExportBulkAction::make()
                     ->exporter(UserExporter::class)
-                    ->label('Export')
+                    ->label('Dışa Aktar')
                     ->color('info'),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

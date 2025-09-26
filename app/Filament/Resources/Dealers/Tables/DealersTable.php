@@ -107,11 +107,11 @@ class DealersTable
             ->toolbarActions([
                 ImportAction::make()
                     ->importer(DealerImporter::class)
-                    ->label('Import')
+                    ->label('İçe Aktar')
                     ->color('success'),
                 ExportBulkAction::make()
                     ->exporter(DealerExporter::class)
-                    ->label('Export')
+                    ->label('Dışa Aktar')
                     ->color('info'),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

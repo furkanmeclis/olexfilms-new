@@ -10,6 +10,7 @@ use App\Filament\Resources\Roles\Tables\RolesTable;
 use Spatie\Permission\Models\Role;
 use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -18,14 +19,14 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::RocketLaunch;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected static ?string $recordTitleAttribute = 'name';
     
+    protected static string|UnitEnum|null $navigationGroup = 'Kullanıcı Yönetimi';
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationLabel = 'Roller';
-    
     protected static ?string $modelLabel = 'Rol';
-    
     protected static ?string $pluralModelLabel = 'Roller';
 
     public static function form(Schema $schema): Schema

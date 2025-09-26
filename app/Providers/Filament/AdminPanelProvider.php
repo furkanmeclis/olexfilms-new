@@ -38,6 +38,10 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            ->brandName('Olex Films')
+            ->brandLogo(asset('logo.png'))
+            ->favicon(asset('logo.png'))
+            ->brandLogoHeight('3rem')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
@@ -54,10 +58,6 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-            ])
-            ->userMenuItems([
-               
-                
             ])
             ->authMiddleware([
                 Authenticate::class,

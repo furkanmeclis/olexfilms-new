@@ -1,0 +1,6 @@
+code,product_name,user_email,location_type,location_name,quantity,quantity_type,used_quantity,notes,is_active
+PC-001,Test Ürün 1,test1@example.com,merkez,Ana Depo,100,adet,0,Test ürün kodu 1,1
+PC-002,Test Ürün 1,test1@example.com,bayi,İstanbul Bayi,50,adet,10,Bayi stoku,1
+PC-003,Test Ürün 2,test2@example.com,depo,Yedek Depo,200,m2,25,Depo stoku,1
+PC-004,Test Ürün 2,test2@example.com,kargo,Kargo Merkezi,75,kutu,5,Kargo stoku,1
+PC-005,Test Ürün 1,test1@example.com,musteri,Müşteri A,25,adet,0,Müşteri teslimi,1
